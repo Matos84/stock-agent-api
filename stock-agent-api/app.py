@@ -1,10 +1,13 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 import os
 
 app = Flask(__name__)
+CORS(app)
+
 
 # לוודא שיש תיקיה לשמירת תמונות
 if not os.path.exists("static"):
@@ -63,16 +66,20 @@ def analyze():
     period = data.get("period", "6mo")
 
     if not symbol:
-        return jsonify({"error": "Symbol is required"}), 400
+        return jsonify({"error": "סימבול מניה נדרש."})
 
     df = get_stock_data(symbol, period)
     if df is None or df.empty:
-        return jsonify({"error": "No data found"}), 404
+        return jsonify({"error": "לא נמצאו נתונים למניה/תקופה שביקשת."})
 
     # לפשט עמודות שוב למקרה שהגיע משהו מורכב
     df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
 
-    df = add_moving_averages(df)
+    try:
+        df = add_moving_averages(df)
+    except Exception as e:
+        return jsonify({"error": f"שגיאה בחישוב ממוצעים נעים: {str(e)}"})
+
     df = df.reset_index(drop=True)
     last_rows = df.tail(10).to_dict(orient="records")
     chart_path = plot_stock_and_save(df, symbol)

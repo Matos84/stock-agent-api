@@ -1,4 +1,5 @@
 Flask
+Flask-CORS
 pandas
 yfinance
 matplotlib
