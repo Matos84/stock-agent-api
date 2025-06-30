@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from watchlist import watchlist_bp
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
@@ -7,6 +8,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
+app.register_blueprint(watchlist_bp)
 
 
 # לוודא שיש תיקיה לשמירת תמונות
@@ -69,6 +71,9 @@ def analyze():
         return jsonify({"error": "סימבול מניה נדרש."})
 
     df = get_stock_data(symbol, period)
+    print("==== DataFrame ====")
+    print(df)
+    print("===================")
     if df is None or df.empty:
         return jsonify({"error": "לא נמצאו נתונים למניה/תקופה שביקשת."})
 
