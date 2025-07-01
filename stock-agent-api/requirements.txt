@@ -4,3 +4,5 @@ pandas
 yfinance
 matplotlib
 numpy
+SQLAlchemy>=2.0
+APScheduler

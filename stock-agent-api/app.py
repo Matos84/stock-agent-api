@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from watchlist import watchlist_bp
+from models import init_db, SessionLocal, PriceAlert   # חדש
 import pandas as pd
 import numpy as np   # ← הוספה חשובה!
 import yfinance as yf
@@ -10,6 +11,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(watchlist_bp)
+init_db()
 
 # לוודא שיש תיקיה לשמירת תמונות
 if not os.path.exists("static"):
