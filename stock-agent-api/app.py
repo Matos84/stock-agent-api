@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from watchlist import watchlist_bp
 import pandas as pd
+import numpy as np   # ← הוספה חשובה!
 import yfinance as yf
 import matplotlib.pyplot as plt
 import os
@@ -9,7 +10,6 @@ import os
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(watchlist_bp)
-
 
 # לוודא שיש תיקיה לשמירת תמונות
 if not os.path.exists("static"):
@@ -86,7 +86,13 @@ def analyze():
         return jsonify({"error": f"שגיאה בחישוב ממוצעים נעים: {str(e)}"})
 
     df = df.reset_index(drop=True)
-    last_rows = df.tail(10).to_dict(orient="records")
+    # ← ← ← פתרון ל-NaN: המרה ל-None (שמתורגמת ל-null ב-JSON)
+    last_rows = (
+        df.tail(10)
+        .replace({np.nan: None})
+        .to_dict(orient="records")
+    )
+
     chart_path = plot_stock_and_save(df, symbol)
 
     response = {
