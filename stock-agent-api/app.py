@@ -74,6 +74,7 @@ def analyze():
     print("==== DataFrame ====")
     print(df)
     print("===================")
+
     if df is None or df.empty:
         return jsonify({"error": "לא נמצאו נתונים למניה/תקופה שביקשת."})
 
@@ -85,13 +86,11 @@ def analyze():
     except Exception as e:
         return jsonify({"error": f"שגיאה בחישוב ממוצעים נעים: {str(e)}"})
 
+    # --- 🔄 המרת NaN/Inf ל-None לפני JSON ---
+    df = df.where(pd.notnull(df), None)
+
     df = df.reset_index(drop=True)
-    # ← ← ← פתרון ל-NaN: המרה ל-None (שמתורגמת ל-null ב-JSON)
-    last_rows = (
-        df.tail(10)
-        .replace({np.nan: None})
-        .to_dict(orient="records")
-    )
+    last_rows = df.tail(10).to_dict(orient="records")
 
     chart_path = plot_stock_and_save(df, symbol)
 
